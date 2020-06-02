@@ -28,7 +28,7 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 from typing import Union, Text
 
-FloatType = Union[tf.Tensor, float, np.float32, np.float64]
+FloatType = Union[tf.Tensor, float, np.float64, np.float64]
 
 
 def _get_v(b1_height: FloatType, b1_width: FloatType, b2_height: FloatType,
@@ -158,7 +158,7 @@ def iou_loss(pred_boxes: FloatType,
     raise ValueError(
         'Unknown loss_type {}, not iou/ciou/diou/giou'.format(iou_type))
 
-  pred_boxes = tf.convert_to_tensor(pred_boxes, tf.float32)
+  pred_boxes = tf.convert_to_tensor(pred_boxes, tf.float64)
   target_boxes = tf.cast(target_boxes, pred_boxes.dtype)
 
   # t_ denotes target boxes and p_ denotes predicted boxes: (y, x, y_max, x_max)

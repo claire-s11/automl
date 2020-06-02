@@ -39,7 +39,7 @@ class EfficientDetArchTest(tf.test.TestCase):
       inputs_shape = [1, 3, isize[0], isize[1]]
     else:
       inputs_shape = [1, isize[0], isize[1], 3]
-    inputs = tf.ones(shape=inputs_shape, name='input', dtype=tf.float32)
+    inputs = tf.ones(shape=inputs_shape, name='input', dtype=tf.float64)
     efficientdet_arch.efficientdet(
         inputs,
         model_name=model_name,
@@ -130,32 +130,32 @@ class EfficientDetArchPrecisionTest(tf.test.TestCase):
                                             False)
 
   def test_float16(self):
-    inputs = tf.ones(shape=[1, 512, 512, 3], name='input', dtype=tf.float32)
+    inputs = tf.ones(shape=[1, 512, 512, 3], name='input', dtype=tf.float64)
     cls_out, _ = self.build_model(inputs, True, 'mixed_float16')
     for v in tf.global_variables():
-      # All variables should be float32.
-      self.assertIn(v.dtype, (tf.float32, tf.dtypes.as_dtype('float32_ref')))
+      # All variables should be float64.
+      self.assertIn(v.dtype, (tf.float64, tf.dtypes.as_dtype('float64_ref')))
 
     for v in cls_out.values():
       self.assertIs(v.dtype, tf.float16)
 
   def test_bfloat16(self):
-    inputs = tf.ones(shape=[1, 512, 512, 3], name='input', dtype=tf.float32)
+    inputs = tf.ones(shape=[1, 512, 512, 3], name='input', dtype=tf.float64)
     cls_out, _ = self.build_model(inputs, True, 'mixed_bfloat16')
     for v in tf.global_variables():
-      # All variables should be float32.
-      self.assertIn(v.dtype, (tf.float32, tf.dtypes.as_dtype('float32_ref')))
+      # All variables should be float64.
+      self.assertIn(v.dtype, (tf.float64, tf.dtypes.as_dtype('float64_ref')))
     for v in cls_out.values():
       self.assertEqual(v.dtype, tf.bfloat16)
 
-  def test_float32(self):
-    inputs = tf.ones(shape=[1, 512, 512, 3], name='input', dtype=tf.float32)
-    cls_out, _ = self.build_model(inputs, True, 'float32')
+  def test_float64(self):
+    inputs = tf.ones(shape=[1, 512, 512, 3], name='input', dtype=tf.float64)
+    cls_out, _ = self.build_model(inputs, True, 'float64')
     for v in tf.global_variables():
-      # All variables should be float32.
-      self.assertIn(v.dtype, (tf.float32, tf.dtypes.as_dtype('float32_ref')))
+      # All variables should be float64.
+      self.assertIn(v.dtype, (tf.float64, tf.dtypes.as_dtype('float64_ref')))
     for v in cls_out.values():
-      self.assertEqual(v.dtype, tf.float32)
+      self.assertEqual(v.dtype, tf.float64)
 
 
 class BackboneTest(tf.test.TestCase):
@@ -225,8 +225,8 @@ class FeatureFusionTest(tf.test.TestCase):
     self.assertAllCloseAccordingToType(fused, [2, 6])
 
   def test_attn(self):
-    nodes = tf.constant([1, 3], dtype=tf.float32)
-    nodes2 = tf.constant([1, 3], dtype=tf.float32)
+    nodes = tf.constant([1, 3], dtype=tf.float64)
+    nodes2 = tf.constant([1, 3], dtype=tf.float64)
     fused = efficientdet_arch.fuse_features([nodes, nodes2], 'attn')
 
     with self.cached_session() as sess:
@@ -236,8 +236,8 @@ class FeatureFusionTest(tf.test.TestCase):
     self.assertAllCloseAccordingToType(fused, [1.0, 3.0])
 
   def test_fastattn(self):
-    nodes = tf.constant([1, 3], dtype=tf.float32)
-    nodes2 = tf.constant([1, 3], dtype=tf.float32)
+    nodes = tf.constant([1, 3], dtype=tf.float64)
+    nodes2 = tf.constant([1, 3], dtype=tf.float64)
     fused = efficientdet_arch.fuse_features([nodes, nodes2], 'fastattn')
 
     with self.cached_session() as sess:
@@ -246,8 +246,8 @@ class FeatureFusionTest(tf.test.TestCase):
     self.assertAllCloseAccordingToType(fused, [0.99995, 2.99985])
 
   def test_channel_attn(self):
-    nodes = tf.constant([1, 3], dtype=tf.float32)
-    nodes2 = tf.constant([1, 3], dtype=tf.float32)
+    nodes = tf.constant([1, 3], dtype=tf.float64)
+    nodes2 = tf.constant([1, 3], dtype=tf.float64)
     fused = efficientdet_arch.fuse_features([nodes, nodes2], 'channel_attn')
 
     with self.cached_session() as sess:
@@ -257,8 +257,8 @@ class FeatureFusionTest(tf.test.TestCase):
     self.assertAllCloseAccordingToType(fused, [1.0, 3.0])
 
   def test_channel_fastattn(self):
-    nodes = tf.constant([1, 3], dtype=tf.float32)
-    nodes2 = tf.constant([1, 3], dtype=tf.float32)
+    nodes = tf.constant([1, 3], dtype=tf.float64)
+    nodes2 = tf.constant([1, 3], dtype=tf.float64)
     fused = efficientdet_arch.fuse_features([nodes, nodes2], 'channel_fastattn')
 
     with self.cached_session() as sess:

@@ -51,7 +51,7 @@ class InputProcessor(object):
   def normalize_image(self):
     """Normalize the image to zero mean and unit variance."""
     # The image normalization is identical to Cloud TPU ResNet.
-    self._image = tf.image.convert_image_dtype(self._image, dtype=tf.float32)
+    self._image = tf.image.convert_image_dtype(self._image, dtype=tf.float64)
     offset = tf.constant([0.485, 0.456, 0.406])
     offset = tf.expand_dims(offset, axis=0)
     offset = tf.expand_dims(offset, axis=0)
@@ -88,18 +88,18 @@ class InputProcessor(object):
     scaled_x = tf.cast(random_scale_factor * target_size[1], tf.int32)
 
     # Recompute the accurate scale_factor using rounded scaled image size.
-    height = tf.cast(tf.shape(self._image)[0], tf.float32)
-    width = tf.cast(tf.shape(self._image)[1], tf.float32)
-    image_scale_y = tf.cast(scaled_y, tf.float32) / height
-    image_scale_x = tf.cast(scaled_x, tf.float32) / width
+    height = tf.cast(tf.shape(self._image)[0], tf.float64)
+    width = tf.cast(tf.shape(self._image)[1], tf.float64)
+    image_scale_y = tf.cast(scaled_y, tf.float64) / height
+    image_scale_x = tf.cast(scaled_x, tf.float64) / width
     image_scale = tf.minimum(image_scale_x, image_scale_y)
 
     # Select non-zero random offset (x, y) if scaled image is larger than
     # self._output_size.
     scaled_height = tf.cast(height * image_scale, tf.int32)
     scaled_width = tf.cast(width * image_scale, tf.int32)
-    offset_y = tf.cast(scaled_height - self._output_size[0], tf.float32)
-    offset_x = tf.cast(scaled_width - self._output_size[1], tf.float32)
+    offset_y = tf.cast(scaled_height - self._output_size[0], tf.float64)
+    offset_x = tf.cast(scaled_width - self._output_size[1], tf.float64)
     offset_y = tf.maximum(0.0, offset_y) * tf.random_uniform([], 0, 1)
     offset_x = tf.maximum(0.0, offset_x) * tf.random_uniform([], 0, 1)
     offset_y = tf.cast(offset_y, tf.int32)
@@ -113,10 +113,10 @@ class InputProcessor(object):
   def set_scale_factors_to_output_size(self):
     """Set the parameters to resize input image to self._output_size."""
     # Compute the scale_factor using rounded scaled image size.
-    height = tf.cast(tf.shape(self._image)[0], tf.float32)
-    width = tf.cast(tf.shape(self._image)[1], tf.float32)
-    image_scale_y = tf.cast(self._output_size[0], tf.float32) / height
-    image_scale_x = tf.cast(self._output_size[1], tf.float32) / width
+    height = tf.cast(tf.shape(self._image)[0], tf.float64)
+    width = tf.cast(tf.shape(self._image)[1], tf.float64)
+    image_scale_y = tf.cast(self._output_size[0], tf.float64) / height
+    image_scale_x = tf.cast(self._output_size[1], tf.float64) / width
     image_scale = tf.minimum(image_scale_x, image_scale_y)
     scaled_height = tf.cast(height * image_scale, tf.int32)
     scaled_width = tf.cast(width * image_scale, tf.int32)
@@ -175,7 +175,7 @@ class DetectionInputProcessor(InputProcessor):
         self._crop_offset_y,
         self._crop_offset_x,
     ])
-    boxes -= tf.cast(tf.reshape(box_offset, [1, 4]), tf.float32)
+    boxes -= tf.cast(tf.reshape(box_offset, [1, 4]), tf.float64)
     # Clip the boxes.
     boxes = self.clip_boxes(boxes)
     # Filter out ground truth boxes that are illegal.
@@ -293,10 +293,10 @@ class InputReader(object):
         image = data['image']
         boxes = data['groundtruth_boxes']
         classes = data['groundtruth_classes']
-        classes = tf.reshape(tf.cast(classes, dtype=tf.float32), [-1, 1])
+        classes = tf.reshape(tf.cast(classes, dtype=tf.float64), [-1, 1])
         areas = data['groundtruth_area']
         is_crowds = data['groundtruth_is_crowd']
-        classes = tf.reshape(tf.cast(classes, dtype=tf.float32), [-1, 1])
+        classes = tf.reshape(tf.cast(classes, dtype=tf.float64), [-1, 1])
 
         if params['skip_crowd_during_training'] and self._is_training:
           indices = tf.where(tf.logical_not(data['groundtruth_is_crowd']))
@@ -337,7 +337,7 @@ class InputReader(object):
         # Pad groundtruth data for evaluation.
         image_scale = input_processor.image_scale_to_original
         boxes *= image_scale
-        is_crowds = tf.cast(is_crowds, dtype=tf.float32)
+        is_crowds = tf.cast(is_crowds, dtype=tf.float64)
         boxes = pad_to_fixed_size(boxes, -1, [self._max_instances_per_image, 4])
         is_crowds = pad_to_fixed_size(is_crowds, 0,
                                       [self._max_instances_per_image, 1])

@@ -29,10 +29,10 @@ class IouUtilsTest(tf.test.TestCase):
   def setUp(self):
     super(IouUtilsTest, self).setUp()
     self.pb = tf.constant([[4.0, 3.0, 7.0, 5.0], [5.0, 6.0, 10.0, 7.0]],
-                          dtype=tf.float32)
+                          dtype=tf.float64)
     self.tb = tf.constant(
-        [[3.0, 4.0, 6.0, 8.0], [14.0, 14.0, 15.0, 15.0]], dtype=tf.float32)
-    self.zeros = tf.constant([[0, 0, 0, 0], [0, 0, 0, 0]], dtype=tf.float32)
+        [[3.0, 4.0, 6.0, 8.0], [14.0, 14.0, 15.0, 15.0]], dtype=tf.float64)
+    self.zeros = tf.constant([[0, 0, 0, 0], [0, 0, 0, 0]], dtype=tf.float64)
 
   def test_iou(self):
     self.assertAllClose(

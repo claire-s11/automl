@@ -256,7 +256,7 @@ class ModelInspector(object):
     """build and save the model into self.logdir."""
     with tf.Graph().as_default(), tf.Session() as sess:
       # Build model with inputs and labels.
-      inputs = tf.placeholder(tf.float32, name='input', shape=self.inputs_shape)
+      inputs = tf.placeholder(tf.float64, name='input', shape=self.inputs_shape)
       outputs = self.build_model(inputs)
 
       # Run the model
@@ -285,7 +285,7 @@ class ModelInspector(object):
     """build and save the model into self.logdir."""
     with tf.Graph().as_default(), tf.Session() as sess:
       # Build model with inputs and labels.
-      inputs = tf.placeholder(tf.float32, name='input', shape=self.inputs_shape)
+      inputs = tf.placeholder(tf.float64, name='input', shape=self.inputs_shape)
       self.build_model(inputs)
       inference.restore_ckpt(sess, self.ckpt_path,
                              self.model_config.moving_average_decay,
@@ -294,7 +294,7 @@ class ModelInspector(object):
   def freeze_model(self) -> Tuple[Text, Text]:
     """Freeze model and convert them into tflite and tf graph."""
     with tf.Graph().as_default(), tf.Session() as sess:
-      inputs = tf.placeholder(tf.float32, name='input', shape=self.inputs_shape)
+      inputs = tf.placeholder(tf.float64, name='input', shape=self.inputs_shape)
       outputs = self.build_model(inputs)
 
       if self.ckpt_path:
@@ -344,7 +344,7 @@ class ModelInspector(object):
           tf.OptimizerOptions.ON_2)
 
     with tf.Graph().as_default(), tf.Session(config=sess_config) as sess:
-      inputs = tf.placeholder(tf.float32, name='input', shape=self.inputs_shape)
+      inputs = tf.placeholder(tf.float64, name='input', shape=self.inputs_shape)
       output = self.build_model(inputs)
 
       img = np.random.uniform(size=self.inputs_shape)

@@ -101,16 +101,16 @@ class UtilsTest(tf.test.TestCase):
 
   def test_precision_float16(self):
     def _model(inputs):
-      x = tf.ones((4, 4, 4, 4), dtype='float32')
+      x = tf.ones((4, 4, 4, 4), dtype='float64')
       conv = tf.keras.layers.Conv2D(filters=4, kernel_size=2, use_bias=False)
       a = tf.Variable(1.0)
       return tf.cast(a, inputs.dtype) * conv(x) * inputs
 
-    x = tf.constant(2.0, dtype=tf.float32)  # input can be any type.
+    x = tf.constant(2.0, dtype=tf.float64)  # input can be any type.
     out = utils.build_model_with_precision('mixed_float16', _model, x, False)
-    # Variables should be float32.
+    # Variables should be float64.
     for v in tf.global_variables():
-      self.assertIn(v.dtype, (tf.float32, tf.dtypes.as_dtype('float32_ref')))
+      self.assertIn(v.dtype, (tf.float64, tf.dtypes.as_dtype('float64_ref')))
     self.assertIs(out.dtype, tf.float16)  # output should be float16.
 
 

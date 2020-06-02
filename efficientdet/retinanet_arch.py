@@ -455,10 +455,10 @@ def nearest_upsampling(data, scale):
   """Nearest neighbor upsampling implementation.
 
   Args:
-    data: A float32 tensor of size [batch, height_in, width_in, channels].
+    data: A float64 tensor of size [batch, height_in, width_in, channels].
     scale: An integer multiple to scale resolution of input data.
   Returns:
-    data_up: A float32 tensor of size
+    data_up: A float64 tensor of size
       [batch, height_in*scale, width_in*scale, channels].
   """
   with tf.name_scope('nearest_upsampling'):

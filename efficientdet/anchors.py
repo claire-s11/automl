@@ -334,13 +334,13 @@ def _generate_detections_tf(cls_outputs,
 
   image_size = utils.parse_image_size(image_size)
   detections = tf.stack([
-      tf.cast(tf.tile(image_id, tf.shape(top_detection_idx)), tf.float32),
+      tf.cast(tf.tile(image_id, tf.shape(top_detection_idx)), tf.float64),
       tf.clip_by_value(boxes[:, 0], 0, image_size[0]) * image_scale,
       tf.clip_by_value(boxes[:, 1], 0, image_size[1]) * image_scale,
       tf.clip_by_value(boxes[:, 2], 0, image_size[0]) * image_scale,
       tf.clip_by_value(boxes[:, 3], 0, image_size[1]) * image_scale,
       scores,
-      tf.cast(tf.gather(classes, top_detection_idx) + 1, tf.float32)
+      tf.cast(tf.gather(classes, top_detection_idx) + 1, tf.float64)
   ], axis=1)
   return detections
 
@@ -405,7 +405,7 @@ def _generate_detections(cls_outputs, box_outputs, anchor_boxes, indices,
     detections.append(top_detections_cls)
 
   def _generate_dummy_detections(number):
-    detections_dummy = np.zeros((number, 7), dtype=np.float32)
+    detections_dummy = np.zeros((number, 7), dtype=np.float64)
     detections_dummy[:, 0] = image_id[0]
     detections_dummy[:, 5] = _DUMMY_DETECTION_SCORE
     return detections_dummy
@@ -415,7 +415,7 @@ def _generate_detections(cls_outputs, box_outputs, anchor_boxes, indices,
     # take final 100 detections
     indices = np.argsort(-detections[:, -2])
     detections = np.array(
-        detections[indices[0:max_boxes_to_draw]], dtype=np.float32)
+        detections[indices[0:max_boxes_to_draw]], dtype=np.float64)
     # Add dummy detections to fill up to 100 detections
     n = max(max_boxes_to_draw - len(detections), 0)
     detections_dummy = _generate_dummy_detections(n)
@@ -468,7 +468,7 @@ class Anchors(object):
     """Generates multiscale anchor boxes."""
     boxes = _generate_anchor_boxes(self.image_size, self.anchor_scale,
                                    self.config)
-    boxes = tf.convert_to_tensor(boxes, dtype=tf.float32)
+    boxes = tf.convert_to_tensor(boxes, dtype=tf.float64)
     return boxes
 
   def get_anchors_per_location(self):
@@ -552,7 +552,7 @@ class AnchorLabeler(object):
     cls_targets_dict = self._unpack_labels(cls_targets)
     box_targets_dict = self._unpack_labels(box_targets)
     num_positives = tf.reduce_sum(
-        tf.cast(tf.not_equal(matches.match_results, -1), tf.float32))
+        tf.cast(tf.not_equal(matches.match_results, -1), tf.float64))
 
     return cls_targets_dict, box_targets_dict, num_positives
 
@@ -584,4 +584,4 @@ class AnchorLabeler(object):
       return tf.py_func(_generate_detections, [
           cls_outputs, box_outputs, self._anchors.boxes, indices, classes,
           image_id, image_scale, self._num_classes, max_boxes_to_draw,
-      ], tf.float32)
+      ], tf.float64)

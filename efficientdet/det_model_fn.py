@@ -60,7 +60,7 @@ def stepwise_lr_schedule(adjusted_learning_rate, lr_warmup_init,
   # scaled up to the full learning rate after `lr_warmup_step` before decaying.
   logging.info('LR schedule method: stepwise')
   linear_warmup = (lr_warmup_init +
-                   (tf.cast(global_step, dtype=tf.float32) / lr_warmup_step *
+                   (tf.cast(global_step, dtype=tf.float64) / lr_warmup_step *
                     (adjusted_learning_rate - lr_warmup_init)))
   learning_rate = tf.where(global_step < lr_warmup_step,
                            linear_warmup, adjusted_learning_rate)
@@ -79,14 +79,14 @@ def cosine_lr_schedule_tf2(adjusted_lr, lr_warmup_init, lr_warmup_step,
   logging.info('LR schedule method: cosine')
   def warmup_lr(step):
     return lr_warmup_init + (adjusted_lr - lr_warmup_init) * (
-        tf.cast(step, tf.float32) / tf.cast(lr_warmup_step, tf.float32))
+        tf.cast(step, tf.float64) / tf.cast(lr_warmup_step, tf.float64))
   def cosine_lr(step):
-    decay_steps = tf.cast(total_steps - lr_warmup_step, tf.float32)
-    step = tf.cast(step - lr_warmup_step, tf.float32)
+    decay_steps = tf.cast(total_steps - lr_warmup_step, tf.float64)
+    step = tf.cast(step - lr_warmup_step, tf.float64)
     cosine_decay = 0.5 * (1 + tf.cos(np.pi * step / decay_steps))
     alpha = 0.0
     decayed = (1 - alpha) * cosine_decay + alpha
-    return adjusted_lr * tf.cast(decayed, tf.float32)
+    return adjusted_lr * tf.cast(decayed, tf.float64)
   return tf.cond(step <= lr_warmup_step,
                  lambda: warmup_lr(step),
                  lambda: cosine_lr(step))
@@ -97,10 +97,10 @@ def cosine_lr_schedule(adjusted_lr, lr_warmup_init, lr_warmup_step,
   logging.info('LR schedule method: cosine')
   linear_warmup = (
       lr_warmup_init +
-      (tf.cast(step, dtype=tf.float32) / lr_warmup_step *
+      (tf.cast(step, dtype=tf.float64) / lr_warmup_step *
        (adjusted_lr - lr_warmup_init)))
   cosine_lr = 0.5 * adjusted_lr * (
-      1 + tf.cos(np.pi * tf.cast(step, tf.float32) / total_steps))
+      1 + tf.cos(np.pi * tf.cast(step, tf.float64) / total_steps))
   return tf.where(step < lr_warmup_step, linear_warmup, cosine_lr)
 
 
@@ -108,10 +108,10 @@ def polynomial_lr_schedule(adjusted_lr, lr_warmup_init, lr_warmup_step, power,
                            total_steps, step):
   logging.info('LR schedule method: polynomial')
   linear_warmup = (
-      lr_warmup_init + (tf.cast(step, dtype=tf.float32) / lr_warmup_step *
+      lr_warmup_init + (tf.cast(step, dtype=tf.float64) / lr_warmup_step *
                         (adjusted_lr - lr_warmup_init)))
   polynomial_lr = adjusted_lr * tf.pow(
-      1 - (tf.cast(step, tf.float32) / total_steps), power)
+      1 - (tf.cast(step, tf.float64) / total_steps), power)
   return tf.where(step < lr_warmup_step, linear_warmup, polynomial_lr)
 
 
@@ -148,16 +148,16 @@ def focal_loss(logits, targets, alpha, gamma, normalizer):
   where pt is the probability of being classified to the true class.
 
   Args:
-    logits: A float32 tensor of size
+    logits: A float64 tensor of size
       [batch, height_in, width_in, num_predictions].
-    targets: A float32 tensor of size
+    targets: A float64 tensor of size
       [batch, height_in, width_in, num_predictions].
-    alpha: A float32 scalar multiplying alpha to the loss from positive examples
+    alpha: A float64 scalar multiplying alpha to the loss from positive examples
       and (1-alpha) to the loss from negative examples.
-    gamma: A float32 scalar modulating loss from hard and easy examples.
-    normalizer: A float32 scalar normalizes the total loss from all examples.
+    gamma: A float64 scalar modulating loss from hard and easy examples.
+    normalizer: A float64 scalar normalizes the total loss from all examples.
   Returns:
-    loss: A float32 scalar representing normalized total loss.
+    loss: A float64 scalar representing normalized total loss.
   """
   with tf.name_scope('focal_loss'):
     positive_label_mask = tf.equal(targets, 1.0)
@@ -300,7 +300,7 @@ def detection_loss(cls_outputs, box_outputs, labels, params):
       cls_loss = tf.reshape(cls_loss,
                             [bs, width, height, -1, params['num_classes']])
     cls_loss *= tf.cast(tf.expand_dims(
-        tf.not_equal(labels['cls_targets_%d' % level], -2), -1), tf.float32)
+        tf.not_equal(labels['cls_targets_%d' % level], -2), -1), tf.float64)
     cls_losses.append(tf.reduce_sum(cls_loss))
     box_losses.append(
         _box_loss(
@@ -469,8 +469,8 @@ def _model_fn(features, labels, mode, params, model, variable_filter_fn=None):
 
   levels = cls_outputs.keys()
   for level in levels:
-    cls_outputs[level] = tf.cast(cls_outputs[level], tf.float32)
-    box_outputs[level] = tf.cast(box_outputs[level], tf.float32)
+    cls_outputs[level] = tf.cast(cls_outputs[level], tf.float64)
+    box_outputs[level] = tf.cast(box_outputs[level], tf.float64)
 
   # First check if it is in PREDICT mode.
   if mode == tf.estimator.ModeKeys.PREDICT:

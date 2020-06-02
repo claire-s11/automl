@@ -127,7 +127,7 @@ class EvaluationMetric(object):
           json.dump(box_result_list, fid)
 
         self._reset()
-        return np.array([0.], dtype=np.float32)
+        return np.array([0.], dtype=np.float64)
       else:
         # Run on validation dataset.
         detections = np.array(self.detections)
@@ -143,7 +143,7 @@ class EvaluationMetric(object):
         # this makes sure the next evaluation will start with an empty list of
         # self.detections.
         self._reset()
-        return np.array(coco_metrics, dtype=np.float32)
+        return np.array(coco_metrics, dtype=np.float64)
 
     def _update_op(detections, groundtruth_data):
       """Update detection results and groundtruth data.
@@ -212,12 +212,12 @@ class EvaluationMetric(object):
     with tf.name_scope('coco_metric'):
       if self.testdev_dir:
         update_op = tf.py_func(_update_op, [detections, groundtruth_data], [])
-        metrics = tf.py_func(_evaluate, [], tf.float32)
+        metrics = tf.py_func(_evaluate, [], tf.float64)
         metrics_dict = {'AP': (metrics, update_op)}
         return metrics_dict
       else:
         update_op = tf.py_func(_update_op, [detections, groundtruth_data], [])
-        metrics = tf.py_func(_evaluate, [], tf.float32)
+        metrics = tf.py_func(_evaluate, [], tf.float64)
         metrics_dict = {}
         for i, name in enumerate(self.metric_names):
           metrics_dict[name] = (metrics[i], update_op)

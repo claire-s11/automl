@@ -184,7 +184,7 @@ def resample_feature_map(feat,
             feat = tf.transpose(feat, [0, 2, 3, 1])
           feat = tf.cast(
               tf.image.resize_nearest_neighbor(
-                  tf.cast(feat, tf.float32), [target_height, target_width]),
+                  tf.cast(feat, tf.float64), [target_height, target_width]),
               dtype=feat.dtype)
           if data_format == 'channels_first':
             feat = tf.transpose(feat, [0, 3, 1, 2])

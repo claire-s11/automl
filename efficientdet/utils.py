@@ -569,7 +569,7 @@ def float16_scope():
     cast_to_float16 = False
     requested_dtype = kwargs['dtype']
     if requested_dtype == tf.float16:
-      kwargs['dtype'] = tf.float32
+      kwargs['dtype'] = tf.float64
       cast_to_float16 = True
     var = getter(*args, **kwargs)
     if cast_to_float16:
@@ -584,21 +584,21 @@ def set_precision_policy(policy_name: Text = None, loss_scale: bool = False):
   """Set precision policy according to the name.
 
   Args:
-    policy_name: precision policy name, one of 'float32', 'mixed_float16',
+    policy_name: precision policy name, one of 'float64', 'mixed_float16',
       'mixed_bfloat16', or None.
     loss_scale: whether to use loss scale (only for training).
   """
   if not policy_name:
     return
 
-  assert policy_name in ('mixed_float16', 'mixed_bfloat16', 'float32')
+  assert policy_name in ('mixed_float16', 'mixed_bfloat16', 'float64')
   logging.info('use mixed precision policy name %s', policy_name)
   # TODO(tanmingxing): use tf.keras.layers.enable_v2_dtype_behavior() when it
   # available in stable TF release.
   from tensorflow.python.keras.engine import base_layer_utils  # pylint: disable=g-import-not-at-top,g-direct-tensorflow-import
   base_layer_utils.enable_v2_dtype_behavior()
   # mixed_float16 training is not supported for now, so disable loss_scale.
-  # float32 and mixed_bfloat16 do not need loss scale for training.
+  # float64 and mixed_bfloat16 do not need loss scale for training.
   if loss_scale:
     policy = tf2.keras.mixed_precision.experimental.Policy(policy_name)
   else:
@@ -630,14 +630,14 @@ def build_model_with_precision(pp, mm, ii, tt, *args, **kwargs):
     inputs = tf.cast(ii, tf.bfloat16)
     with tf.tpu.bfloat16_scope():
       outputs = mm(inputs, *args, **kwargs)
-    set_precision_policy('float32')
+    set_precision_policy('float64')
   elif pp == 'mixed_float16':
     set_precision_policy(pp, loss_scale=tt)
     inputs = tf.cast(ii, tf.float16)
     with float16_scope():
       outputs = mm(inputs, *args, **kwargs)
-    set_precision_policy('float32')
-  elif not pp or pp == 'float32':
+    set_precision_policy('float64')
+  elif not pp or pp == 'float64':
     outputs = mm(ii, *args, **kwargs)
   else:
     raise ValueError('Unknow precision name {}'.format(pp))

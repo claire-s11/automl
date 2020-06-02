@@ -118,7 +118,7 @@ class ModelInspectTest(tf.test.TestCase):
     inspector.run_model('saved_model')
     self.assertTrue(
         os.path.exists(os.path.join(self.savedmodel_dir, 'saved_model.pb')))
-    utils.set_precision_policy('float32')
+    utils.set_precision_policy('float64')
 
   def test_saved_model_infer(self):
     inspector = model_inspect.ModelInspector(**self.params)
